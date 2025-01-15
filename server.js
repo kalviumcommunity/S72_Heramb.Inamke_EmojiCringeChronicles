@@ -16,7 +16,7 @@ app.use((err, req, res, next) => {
   console.error(err.stack); // Log the error stack for debugging
   res.status(500).json({
     error: 'Something went wrong!',
-    message: err.message,
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error',
   });
 });
 
@@ -24,10 +24,11 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
   res.status(404).json({
     error: 'Not Found',
-    message: 'The requested resource was not found on this server.',
+    message: `The resource at ${req.originalUrl} was not found on this server.`,
   });
 });
 
+// Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
