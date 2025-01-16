@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "Project Title",
   "main": "index.js",
-
   "keywords": [],
   "author": "Heramb",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
 }
