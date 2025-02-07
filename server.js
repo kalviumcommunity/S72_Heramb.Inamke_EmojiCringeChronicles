@@ -9,7 +9,7 @@ const port = 3000;
 
 const mongoURI = process.env.MONGO_URI;
 
-// Ensure MongoDB URI is provided
+
 if (!mongoURI) {
   console.error("❌ Missing MONGO_URI in .env file");
   process.exit(1);
@@ -24,7 +24,7 @@ mongoose
     process.exit(1);
   });
 
-// Home route - Displays MongoDB connection status
+
 app.get("/", (req, res) => {
   const statusMap = {
     0: "Disconnected",

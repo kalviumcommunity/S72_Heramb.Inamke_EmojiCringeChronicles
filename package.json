@@ -2,7 +2,11 @@
   "name": "s72_heramb.inamke_emojicringechronicles",
   "version": "1.0.0",
   "description": "Project Title",
-  "main": "index.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
   "keywords": [],
   "author": "Heramb",
   "license": "ISC",
@@ -10,5 +14,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mongoose": "^8.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   }
 }
