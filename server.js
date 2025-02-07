@@ -1,14 +1,18 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import routeFile from "./routes.js"; // Ensure this file exists
 
 dotenv.config();
 
 const app = express();
 const port = 3000;
-
 const mongoURI = process.env.MONGO_URI;
 
+app.use(express.json()); // Middleware to parse JSON requests
+app.use(express.static);
+
+app.use('/', routeFile);
 
 if (!mongoURI) {
   console.error("❌ Missing MONGO_URI in .env file");
@@ -23,7 +27,6 @@ mongoose
     console.error("❌ MongoDB Connection Error:", err);
     process.exit(1);
   });
-
 
 app.get("/", (req, res) => {
   const statusMap = {
