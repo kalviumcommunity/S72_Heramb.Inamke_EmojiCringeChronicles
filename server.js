@@ -1,7 +1,24 @@
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 const express = require('express');
 const app = express();
 const port = 3000;
 
+dotenv.config();
+
+const mongoURI = process.env.MONGO_URI;
+
+mongoose
+  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB Connection Error:", err));
+
+
+  app.get("/", (req, res) => {
+    const dbStatus = mongoose.connection.readyState === 1 ? "Connected" : "Not Connected";
+    res.json({ database: dbStatus });
+  });
+  
 // Basic /ping route with error handling
 app.get('/ping', (req, res, next) => {
   try {
