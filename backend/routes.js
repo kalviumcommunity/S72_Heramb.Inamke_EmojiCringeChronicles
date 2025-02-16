@@ -1,54 +1,59 @@
 const express = require("express");
 const router = express.Router();
-const Genre = require("./genre.model");
+const EmojiCombo = require("./emojiCombo.model");
 
-router.post("/genres", async (req, res) => {
+// Create a new emoji combo
+router.post("/emoji-combos", async (req, res) => {
   try {
-    const { name } = req.body;
-    const newGenre = new Genre({ name });
-    await newGenre.save();
-    res.status(201).json(newGenre);
+    const { emojis, description } = req.body;
+    const newCombo = new EmojiCombo({ emojis, description });
+    await newCombo.save();
+    res.status(201).json(newCombo);
   } catch (error) {
-    res.status(500).json({ error: "Error adding genre" });
+    res.status(500).json({ error: "Error adding emoji combo" });
   }
 });
 
-router.get("/genres", async (req, res) => {
+// Get all emoji combos
+router.get("/emoji-combos", async (req, res) => {
   try {
-    const genres = await Genre.find();
-    res.status(200).json(genres);
+    const combos = await EmojiCombo.find();
+    res.status(200).json(combos);
   } catch (error) {
-    res.status(500).json({ error: "Error fetching genres" });
+    res.status(500).json({ error: "Error fetching emoji combos" });
   }
 });
 
-router.get("/genres/:id", async (req, res) => {
+// Get a single emoji combo by ID
+router.get("/emoji-combos/:id", async (req, res) => {
   try {
-    const genre = await Genre.findById(req.params.id);
-    if (!genre) return res.status(404).json({ error: "Genre not found" });
-    res.status(200).json(genre);
+    const combo = await EmojiCombo.findById(req.params.id);
+    if (!combo) return res.status(404).json({ error: "Emoji combo not found" });
+    res.status(200).json(combo);
   } catch (error) {
-    res.status(500).json({ error: "Error fetching genre" });
+    res.status(500).json({ error: "Error fetching emoji combo" });
   }
 });
 
-router.put("/genres/:id", async (req, res) => {
+// Update an emoji combo
+router.put("/emoji-combos/:id", async (req, res) => {
   try {
-    const updatedGenre = await Genre.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedGenre) return res.status(404).json({ error: "Genre not found" });
-    res.status(200).json(updatedGenre);
+    const updatedCombo = await EmojiCombo.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedCombo) return res.status(404).json({ error: "Emoji combo not found" });
+    res.status(200).json(updatedCombo);
   } catch (error) {
-    res.status(500).json({ error: "Error updating genre" });
+    res.status(500).json({ error: "Error updating emoji combo" });
   }
 });
 
-router.delete("/genres/:id", async (req, res) => {
+// Delete an emoji combo
+router.delete("/emoji-combos/:id", async (req, res) => {
   try {
-    const deletedGenre = await Genre.findByIdAndDelete(req.params.id);
-    if (!deletedGenre) return res.status(404).json({ error: "Genre not found" });
-    res.status(200).json({ message: "Genre deleted successfully" });
+    const deletedCombo = await EmojiCombo.findByIdAndDelete(req.params.id);
+    if (!deletedCombo) return res.status(404).json({ error: "Emoji combo not found" });
+    res.status(200).json({ message: "Emoji combo deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Error deleting genre" });
+    res.status(500).json({ error: "Error deleting emoji combo" });
   }
 });
 
