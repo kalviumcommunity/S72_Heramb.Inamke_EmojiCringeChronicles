@@ -57,3 +57,8 @@ This project combines technical mastery with a dash of humor, making it an enjoy
  ### Render Link :- 
   - https://s72-heramb-inamke-emojicringechronicles.onrender.com
   -
+ ### CloudFlare :- 
+ - https://32d06c4a.s72-heramb-inamke-emojicringechronicles.pages.dev/
+ -
+
+ 
