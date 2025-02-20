@@ -8,3 +8,4 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
+1
