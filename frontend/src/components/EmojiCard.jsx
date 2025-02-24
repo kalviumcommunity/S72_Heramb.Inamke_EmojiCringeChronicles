@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'; //Import the proptypes
 
 const EmojiCard = memo(({ emoji, title, description }) => {
     return (
@@ -8,6 +8,8 @@ const EmojiCard = memo(({ emoji, title, description }) => {
                 <span className="text-3xl mr-2" role="img" aria-label={title}>{emoji}</span>
                 {title}
             </h2>
+
+            
             <p className="text-gray-600 dark:text-gray-300">{description}</p>
         </div>
     );
