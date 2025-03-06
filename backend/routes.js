@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const EmojiCombo = require("./emojiCombo.model");
+const EmojiCombo = require("./Models/emojiCombo.js");
 
 // Middleware to handle async route handlers
 const asyncHandler = fn => (req, res, next) => {
