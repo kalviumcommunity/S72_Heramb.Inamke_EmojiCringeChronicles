@@ -13,6 +13,11 @@ app.use(cors());
 app.use(express.json());
 app.use('/api', routes);
 
+// Default Route
+app.get('/', (req, res) => {
+    res.json({ message: 'Welcome to the API!' });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -40,11 +45,7 @@ const connectDatabase = async (retries = 5) => {
     
     for (let i = 0; i < retries; i++) {
         try {
-            const conn = await mongoose.connect(process.env.MONGO_URL, {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-                serverSelectionTimeoutMS: 5000,
-            });
+            const conn = await mongoose.connect(process.env.MONGO_URL);
             console.log(`✅ Database connected: ${conn.connection.host}`);
             return;
         } catch (error) {
@@ -76,6 +77,6 @@ process.on('SIGINT', gracefulShutdown);
 // Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`🚀 Server is running on port http://localhost:${PORT}`);
     connectDatabase();
 });
