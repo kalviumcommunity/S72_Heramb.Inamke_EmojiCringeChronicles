@@ -9,6 +9,8 @@ const LandingPage = memo(() => {
       <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
         Discover the most hilariously awful emoji combinations!
       </p>
+
+      
     </div>
   );
 });
