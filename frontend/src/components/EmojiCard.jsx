@@ -2,9 +2,9 @@ import React from "react";
 
 const EmojiComboCard = ({ emoji, description }) => {
     return (
-        <div className="p-4 border rounded-lg shadow-md bg-white">
-            <p className="text-3xl">{emoji}</p>
-            <p className="text-gray-600 mt-2">{description}</p>
+        <div className="bg-neutral-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-primary-purple border-opacity-20">
+            <p className="text-4xl mb-4">{emoji}</p>
+            <p className="text-neutral-charcoal text-sm">{description}</p>
         </div>
     );
 };
