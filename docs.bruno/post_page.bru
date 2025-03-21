@@ -1,0 +1,27 @@
+meta {
+  name: post_page
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:3000/tasks
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Complete ASAP Project",
+    "description": "Implement the API and push to GitHub",
+    "status": "pending",
+    "assignedTo": "John Doe",
+    "dueDate": "2025-02-10",
+    "priority": "high"
+  }
+  
+}
