@@ -13,26 +13,32 @@ const emojiComboSchema = new mongoose.Schema({
         trim: true,
         maxlength: [200, 'Description cannot be longer than 200 characters']
     },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: [true, 'User ID is required']
+    },
+    username: {
+        type: String,
+        required: [true, 'Username is required']
+    },
     createdAt: { 
         type: Date, 
         default: Date.now,
-        index: true // Add index for sorting
+        index: true
     }
 }, {
-    timestamps: true, // Adds updatedAt field automatically
-    toJSON: { virtuals: true }, // Enable virtuals when converting to JSON
+    timestamps: true,
+    toJSON: { virtuals: true },
     toObject: { virtuals: true }
 });
 
-// Add index for better query performance
 emojiComboSchema.index({ createdAt: -1 });
 
-// Virtual for emoji count
 emojiComboSchema.virtual('emojiCount').get(function() {
     return Array.from(this.emojis.match(/\p{Emoji}/gu) || []).length;
 });
 
-// Pre-save middleware to validate emoji content
 emojiComboSchema.pre('save', function(next) {
     if (!/\p{Emoji}/gu.test(this.emojis)) {
         next(new Error('Emoji combination must contain at least one emoji'));

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const routes = require('./routes');
+const authRoutes = require('./routes/auth');
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/api', routes);
+app.use('/api/auth', authRoutes);
 
 // Default Route
 app.get('/', (req, res) => {
@@ -25,15 +27,6 @@ app.use((err, req, res, next) => {
         error: 'Something went wrong!',
         message: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
-});
-
-// Simple Ping Route
-app.get('/ping', (req, res) => {
-    try {
-        res.json({ message: 'Pong!', timestamp: new Date().toISOString() });
-    } catch (error) {
-        next(error);
-    }
 });
 
 // Database Connection with retry logic
@@ -54,7 +47,7 @@ const connectDatabase = async (retries = 5) => {
                 console.error("❌ Max retries reached. Exiting...");
                 process.exit(1);
             }
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds before retrying
+            await new Promise(resolve => setTimeout(resolve, 5000));
         }
     }
 };
