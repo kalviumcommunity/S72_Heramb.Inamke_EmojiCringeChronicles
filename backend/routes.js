@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const EmojiCombo = require("./Models/emojiCombo.js");
 const authMiddleware = require('./middleware/auth');
+const { validateEmojiCombo } = require('./middleware/validation');
 
 // Middleware to handle async route handlers
 const asyncHandler = fn => (req, res, next) => {
@@ -9,12 +10,8 @@ const asyncHandler = fn => (req, res, next) => {
 };
 
 // Create a new emoji combo (protected route)
-router.post("/emoji-combos", authMiddleware, asyncHandler(async (req, res) => {
+router.post("/emoji-combos", authMiddleware, validateEmojiCombo, asyncHandler(async (req, res) => {
     const { emojis, description } = req.body;
-    
-    if (!emojis || !description) {
-        return res.status(400).json({ error: "Emojis and description are required" });
-    }
     
     const newCombo = new EmojiCombo({
         emojis,
@@ -66,12 +63,8 @@ router.get("/emoji-combos/:id", asyncHandler(async (req, res) => {
 }));
 
 // Update an emoji combo (protected route)
-router.put("/emoji-combos/:id", authMiddleware, asyncHandler(async (req, res) => {
+router.put("/emoji-combos/:id", authMiddleware, validateEmojiCombo, asyncHandler(async (req, res) => {
     const { emojis, description } = req.body;
-    
-    if (!emojis && !description) {
-        return res.status(400).json({ error: "At least one field to update is required" });
-    }
     
     const combo = await EmojiCombo.findOne({
         _id: req.params.id,

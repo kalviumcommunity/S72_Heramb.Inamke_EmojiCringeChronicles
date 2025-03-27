@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../Models/user');
 const jwt = require('jsonwebtoken');
+const { validateAuth } = require('../middleware/validation');
 
 // Middleware to handle async route handlers
 const asyncHandler = fn => (req, res, next) => {
@@ -9,7 +10,7 @@ const asyncHandler = fn => (req, res, next) => {
 };
 
 // Register new user
-router.post('/register', asyncHandler(async (req, res) => {
+router.post('/register', validateAuth, asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
 
     // Check if user already exists
@@ -43,7 +44,7 @@ router.post('/register', asyncHandler(async (req, res) => {
 }));
 
 // Login user
-router.post('/login', asyncHandler(async (req, res) => {
+router.post('/login', validateAuth, asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     // Find user by email
