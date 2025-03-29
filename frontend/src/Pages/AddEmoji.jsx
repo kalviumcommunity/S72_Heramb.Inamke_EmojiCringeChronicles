@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const API_BASE_URL = 'https://emojicringechronicles.onrender.com/api';
+
 const AddEmoji = () => {
     const [formData, setFormData] = useState({
         emojis: '',
@@ -16,7 +18,7 @@ const AddEmoji = () => {
         setLoading(true);
 
         try {
-            await axios.post('http://localhost:3000/api/emoji-combos', formData);
+            await axios.post(`${API_BASE_URL}/emoji-combos`, formData);
             toast.success('Emoji combination added successfully!');
             navigate('/account');
         } catch (err) {

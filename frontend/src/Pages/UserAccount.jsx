@@ -5,6 +5,8 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import EmojiComboCard from '../components/EmojiCard';
 
+const API_BASE_URL = 'https://emojicringechronicles.onrender.com/api';
+
 const UserAccount = () => {
   const { user, logout } = useAuth();
   const [combos, setCombos] = useState([]);
@@ -17,7 +19,7 @@ const UserAccount = () => {
 
   const fetchUserCombos = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/my-emoji-combos');
+      const response = await axios.get(`${API_BASE_URL}/my-emoji-combos`);
       setCombos(response.data);
     } catch (error) {
       toast.error('Failed to fetch your emoji combinations');
@@ -28,7 +30,7 @@ const UserAccount = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/emoji-combos/${id}`);
+      await axios.delete(`${API_BASE_URL}/emoji-combos/${id}`);
       setCombos(combos.filter(combo => combo._id !== id));
       toast.success('Emoji combination deleted successfully');
     } catch (error) {

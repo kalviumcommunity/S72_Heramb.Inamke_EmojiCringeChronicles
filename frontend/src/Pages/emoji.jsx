@@ -5,6 +5,8 @@ import toast from "react-hot-toast";
 import EmojiComboCard from "../components/EmojiCard";
 import { useAuth } from "../context/AuthContext";
 
+const API_BASE_URL = 'https://emojicringechronicles.onrender.com/api';
+
 const EmojiComboList = () => {
     const [emojiCombos, setEmojiCombos] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,7 +15,7 @@ const EmojiComboList = () => {
     const fetchEmojiCombos = async () => {
         try {
             setLoading(true);
-            const response = await axios.get("http://localhost:3000/api/emoji-combos");
+            const response = await axios.get(`${API_BASE_URL}/emoji-combos`);
             setEmojiCombos(response.data.combos);
         } catch (err) {
             toast.error('Failed to fetch emoji combinations');
