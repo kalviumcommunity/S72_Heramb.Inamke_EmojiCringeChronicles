@@ -4,8 +4,6 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
-const API_BASE_URL = 'https://emojicringechronicles.onrender.com/api';
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,13 +17,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Initialize auth state from localStorage
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
     if (token && userData) {
-      setUser(JSON.parse(userData));
       setupAxiosDefaults(token);
+      setUser(JSON.parse(userData));
     }
     
     setLoading(false);
@@ -33,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+      const response = await axios.post('http://localhost:3000/api/auth/login', {
         email,
         password
       });
@@ -54,7 +53,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+      const response = await axios.post('http://localhost:3000/api/auth/register', {
         username,
         email,
         password
@@ -91,7 +90,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
@@ -107,3 +106,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export default AuthContext;

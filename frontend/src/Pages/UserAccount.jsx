@@ -5,8 +5,6 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import EmojiComboCard from '../components/EmojiCard';
 
-const API_BASE_URL = 'https://emojicringechronicles.onrender.com/api';
-
 const UserAccount = () => {
   const { user, logout } = useAuth();
   const [combos, setCombos] = useState([]);
@@ -14,15 +12,31 @@ const UserAccount = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchUserCombos();
-  }, []);
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      fetchUserCombos();
+    } else {
+      // If no token, redirect to login or show an error
+      toast.error('Not authenticated. Please log in.');
+      setLoading(false);
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const fetchUserCombos = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/my-emoji-combos`);
+      const response = await axios.get('http://localhost:3000/api/my-emoji-combos');
       setCombos(response.data);
     } catch (error) {
-      toast.error('Failed to fetch your emoji combinations');
+      console.error('Error fetching combos:', error);
+      if (error.response && error.response.status === 401) {
+        toast.error('Session expired. Please log in again.');
+        logout();
+        navigate('/login');
+      } else {
+        toast.error('Failed to fetch your emoji combinations');
+      }
     } finally {
       setLoading(false);
     }
@@ -30,11 +44,23 @@ const UserAccount = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/emoji-combos/${id}`);
+      // Ensure token is in headers for this request too
+      const token = localStorage.getItem('token');
+      if (token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      }
+      
+      await axios.delete(`http://localhost:3000/api/emoji-combos/${id}`);
       setCombos(combos.filter(combo => combo._id !== id));
       toast.success('Emoji combination deleted successfully');
     } catch (error) {
-      toast.error('Failed to delete emoji combination');
+      if (error.response && error.response.status === 401) {
+        toast.error('Session expired. Please log in again.');
+        logout();
+        navigate('/login');
+      } else {
+        toast.error('Failed to delete emoji combination');
+      }
     }
   };
 

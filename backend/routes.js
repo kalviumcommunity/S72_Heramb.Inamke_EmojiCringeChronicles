@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const EmojiCombo = require("./Models/emojiCombo.js");
+const User = require("./Models/user.js");
 const authMiddleware = require('./middleware/auth');
 const { validateEmojiCombo } = require('./middleware/validation');
 
@@ -17,7 +18,8 @@ router.post("/emoji-combos", authMiddleware, validateEmojiCombo, asyncHandler(as
         emojis,
         description,
         userId: req.user.userId,
-        username: req.user.username
+        username: req.user.username,
+        created_by: req.user.userId
     });
     
     await newCombo.save();
@@ -28,14 +30,17 @@ router.post("/emoji-combos", authMiddleware, validateEmojiCombo, asyncHandler(as
 router.get("/emoji-combos", asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const createdBy = req.query.createdBy;
     const skip = (page - 1) * limit;
     
+    const query = createdBy ? { created_by: createdBy } : {};
+    
     const [combos, total] = await Promise.all([
-        EmojiCombo.find()
+        EmojiCombo.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit),
-        EmojiCombo.countDocuments()
+        EmojiCombo.countDocuments(query)
     ]);
     
     res.status(200).json({
@@ -44,6 +49,12 @@ router.get("/emoji-combos", asyncHandler(async (req, res) => {
         totalPages: Math.ceil(total / limit),
         totalItems: total
     });
+}));
+
+// Get all users
+router.get("/users", asyncHandler(async (req, res) => {
+    const users = await User.find({}, { username: 1, _id: 1 });
+    res.status(200).json(users);
 }));
 
 // Get user's emoji combos
