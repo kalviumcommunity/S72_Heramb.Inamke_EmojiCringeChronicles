@@ -29,7 +29,7 @@ const EditEmoji = () => {
 
     const fetchEmojiCombo = async () => {
         try {
-            const response = await axios.get(`https://emojicringechronicles.onrender.com/${id}`);
+            const response = await axios.get(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`);
             const { emojis, description } = response.data;
             setFormData({ emojis, description });
         } catch (err) {
