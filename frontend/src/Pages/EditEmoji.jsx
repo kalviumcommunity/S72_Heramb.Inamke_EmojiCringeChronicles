@@ -29,7 +29,7 @@ const EditEmoji = () => {
 
     const fetchEmojiCombo = async () => {
         try {
-            const response = await axios.get(`http://localhost:3000/api/emoji-combos/${id}`);
+            const response = await axios.get(`https://emojicringechronicles.onrender.com/${id}`);
             const { emojis, description } = response.data;
             setFormData({ emojis, description });
         } catch (err) {
@@ -58,7 +58,7 @@ const EditEmoji = () => {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             }
             
-            await axios.put(`http://localhost:3000/api/emoji-combos/${id}`, formData);
+            await axios.put(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`, formData);
             toast.success('Emoji combination updated successfully');
             navigate('/account');
         } catch (err) {

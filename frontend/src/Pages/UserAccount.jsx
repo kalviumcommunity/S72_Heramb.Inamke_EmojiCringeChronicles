@@ -26,7 +26,7 @@ const UserAccount = () => {
 
   const fetchUserCombos = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/my-emoji-combos');
+      const response = await axios.get('https://emojicringechronicles.onrender.com/api/my-emoji-combos');
       setCombos(response.data);
     } catch (error) {
       console.error('Error fetching combos:', error);
@@ -50,7 +50,7 @@ const UserAccount = () => {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
       
-      await axios.delete(`http://localhost:3000/api/emoji-combos/${id}`);
+      await axios.delete(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`);
       setCombos(combos.filter(combo => combo._id !== id));
       toast.success('Emoji combination deleted successfully');
     } catch (error) {

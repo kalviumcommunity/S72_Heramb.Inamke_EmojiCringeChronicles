@@ -14,7 +14,7 @@ const EmojiComboList = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/api/users");
+            const response = await axios.get("https://emojicringechronicles.onrender.com/api/users");
             setUsers(response.data);
         } catch (err) {
             toast.error('Failed to fetch users');
@@ -25,8 +25,8 @@ const EmojiComboList = () => {
         try {
             setLoading(true);
             const url = selectedUser 
-                ? `http://localhost:3000/api/emoji-combos?createdBy=${selectedUser}`
-                : "https://emojicringechronicles.onrender.com";
+                ? `https://emojicringechronicles.onrender.com?createdBy=${selectedUser}`
+                : "https://emojicringechronicles.onrender.com/api/emoji-combos";
             const response = await axios.get(url);
             setEmojiCombos(response.data.combos);
         } catch (err) {

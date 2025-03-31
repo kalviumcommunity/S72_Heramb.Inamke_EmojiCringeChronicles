@@ -38,7 +38,7 @@ const AddEmoji = () => {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             }
             
-            await axios.post('http://localhost:3000/api/emoji-combos', formData);
+            await axios.post('https://emojicringechronicles.onrender.com/api/emoji-combos', formData);
             toast.success('Emoji combination added successfully');
             navigate('/account');
         } catch (err) {
