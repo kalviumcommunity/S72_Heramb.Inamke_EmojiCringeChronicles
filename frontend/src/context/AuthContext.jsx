@@ -17,13 +17,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Initialize auth state from localStorage
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
     if (token && userData) {
-      setUser(JSON.parse(userData));
       setupAxiosDefaults(token);
+      setUser(JSON.parse(userData));
     }
     
     setLoading(false);
@@ -89,7 +90,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
@@ -105,3 +106,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export default AuthContext;

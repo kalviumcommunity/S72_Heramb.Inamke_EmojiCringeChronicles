@@ -1,26 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext'; // Assuming you have this import
 
 const AddEmoji = () => {
+    const navigate = useNavigate();
+    const { logout } = useAuth(); // Assuming your AuthContext exports logout
     const [formData, setFormData] = useState({
         emojis: '',
         description: ''
     });
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        // Check authentication on component mount
+        const token = localStorage.getItem('token');
+        if (!token) {
+            toast.error('Not authenticated. Please log in.');
+            navigate('/login');
+        } else {
+            // Set the token in the headers for all subsequent requests
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
+    }, [navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
 
         try {
+            // Ensure token is in headers for this request
+            const token = localStorage.getItem('token');
+            if (token) {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            }
+            
             await axios.post('http://localhost:3000/api/emoji-combos', formData);
-            toast.success('Emoji combination added successfully!');
+            toast.success('Emoji combination added successfully');
             navigate('/account');
         } catch (err) {
-            toast.error(err.response?.data?.error || 'Failed to add emoji combination');
+            if (err.response && err.response.status === 401) {
+                toast.error('Session expired. Please log in again.');
+                logout();
+                navigate('/login');
+            } else {
+                setError(err.response?.data?.error || 'Failed to add emoji combination');
+                toast.error(err.response?.data?.error || 'Failed to add emoji combination');
+            }
         } finally {
             setLoading(false);
         }
@@ -35,34 +64,16 @@ const AddEmoji = () => {
 
     return (
         <div className="min-h-screen bg-neutral-white flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
-            <nav className="w-full max-w-md mb-8 flex justify-between items-center">
-                <Link
-                    to="/account"
-                    className="flex items-center px-4 py-2 text-primary-purple hover:text-opacity-80 transition-colors"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                    </svg>
-                    Back to Account
-                </Link>
-                <Link
-                    to="/emoji"
-                    className="flex items-center px-4 py-2 text-primary-purple hover:text-opacity-80 transition-colors"
-                >
-                    View All
-                </Link>
-            </nav>
-            
             <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
                 <div className="text-center">
                     <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-purple to-primary-pink">
-                        Create New Combination
+                        Add New Emoji Combination
                     </h2>
                     <p className="mt-2 text-sm text-neutral-charcoal">
-                        Share your most creative (or cringeworthy) emoji combinations!
+                        Create a new emoji combination
                     </p>
                 </div>
-                
+
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <div>
@@ -75,7 +86,7 @@ const AddEmoji = () => {
                                 type="text"
                                 required
                                 className="appearance-none relative block w-full px-3 py-2 border border-primary-purple border-opacity-20 rounded-md placeholder-neutral-charcoal placeholder-opacity-50 text-neutral-charcoal focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple focus:z-10 sm:text-sm bg-neutral-white"
-                                placeholder="Enter your emoji combination"
+                                placeholder="Enter emoji combination (e.g. 😊🌟)"
                                 value={formData.emojis}
                                 onChange={handleChange}
                             />
@@ -89,13 +100,19 @@ const AddEmoji = () => {
                                 name="description"
                                 required
                                 className="appearance-none relative block w-full px-3 py-2 border border-primary-purple border-opacity-20 rounded-md placeholder-neutral-charcoal placeholder-opacity-50 text-neutral-charcoal focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple focus:z-10 sm:text-sm bg-neutral-white"
-                                placeholder="Describe your emoji combination"
+                                placeholder="Describe what this emoji combination means"
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows="4"
                             />
                         </div>
                     </div>
+
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+                            {error}
+                        </div>
+                    )}
 
                     <div className="flex gap-4">
                         <Link

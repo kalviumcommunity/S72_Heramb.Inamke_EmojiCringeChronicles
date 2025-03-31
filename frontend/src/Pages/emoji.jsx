@@ -8,12 +8,26 @@ import { useAuth } from "../context/AuthContext";
 const EmojiComboList = () => {
     const [emojiCombos, setEmojiCombos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [users, setUsers] = useState([]);
+    const [selectedUser, setSelectedUser] = useState("");
     const { user } = useAuth();
+
+    const fetchUsers = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/api/users");
+            setUsers(response.data);
+        } catch (err) {
+            toast.error('Failed to fetch users');
+        }
+    };
 
     const fetchEmojiCombos = async () => {
         try {
             setLoading(true);
-            const response = await axios.get("http://localhost:3000/api/emoji-combos");
+            const url = selectedUser 
+                ? `http://localhost:3000/api/emoji-combos?createdBy=${selectedUser}`
+                : "http://localhost:3000/api/emoji-combos";
+            const response = await axios.get(url);
             setEmojiCombos(response.data.combos);
         } catch (err) {
             toast.error('Failed to fetch emoji combinations');
@@ -23,8 +37,13 @@ const EmojiComboList = () => {
     };
 
     useEffect(() => {
+        fetchUsers();
         fetchEmojiCombos();
     }, []);
+
+    useEffect(() => {
+        fetchEmojiCombos();
+    }, [selectedUser]);
 
     const handleRefresh = () => {
         fetchEmojiCombos();
@@ -50,7 +69,19 @@ const EmojiComboList = () => {
                     </svg>
                     {user ? 'Back to Account' : 'Home'}
                 </Link>
-                <div className="flex gap-4">
+                <div className="flex gap-4 items-center">
+                    <select
+                        value={selectedUser}
+                        onChange={(e) => setSelectedUser(e.target.value)}
+                        className="px-4 py-2 border border-primary-purple rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-purple"
+                    >
+                        <option value="">All Users</option>
+                        {users.map((user) => (
+                            <option key={user._id} value={user._id}>
+                                {user.username}
+                            </option>
+                        ))}
+                    </select>
                     <button
                         onClick={handleRefresh}
                         className="px-4 py-2 text-secondary-green border border-secondary-green rounded-lg hover:bg-secondary-green hover:text-neutral-white transition-colors"

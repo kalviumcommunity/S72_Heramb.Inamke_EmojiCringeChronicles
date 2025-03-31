@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext'; // Assuming you have this import
 
 const EditEmoji = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { logout } = useAuth(); // Assuming your AuthContext exports logout
     const [formData, setFormData] = useState({
         emojis: '',
         description: ''
@@ -14,8 +16,16 @@ const EditEmoji = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        fetchEmojiCombo();
-    }, [id]);
+        const token = localStorage.getItem('token');
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            fetchEmojiCombo();
+        } else {
+            toast.error('Not authenticated. Please log in.');
+            setLoading(false);
+            navigate('/login');
+        }
+    }, [id, navigate]);
 
     const fetchEmojiCombo = async () => {
         try {
@@ -23,8 +33,14 @@ const EditEmoji = () => {
             const { emojis, description } = response.data;
             setFormData({ emojis, description });
         } catch (err) {
-            setError('Failed to fetch emoji combination');
-            toast.error('Failed to fetch emoji combination');
+            if (err.response && err.response.status === 401) {
+                toast.error('Session expired. Please log in again.');
+                logout();
+                navigate('/login');
+            } else {
+                setError('Failed to fetch emoji combination');
+                toast.error('Failed to fetch emoji combination');
+            }
         } finally {
             setLoading(false);
         }
@@ -36,12 +52,24 @@ const EditEmoji = () => {
         setError('');
 
         try {
+            // Ensure token is in headers for this request too
+            const token = localStorage.getItem('token');
+            if (token) {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            }
+            
             await axios.put(`http://localhost:3000/api/emoji-combos/${id}`, formData);
             toast.success('Emoji combination updated successfully');
             navigate('/account');
         } catch (err) {
-            setError(err.response?.data?.error || 'Failed to update emoji combination');
-            toast.error(err.response?.data?.error || 'Failed to update emoji combination');
+            if (err.response && err.response.status === 401) {
+                toast.error('Session expired. Please log in again.');
+                logout();
+                navigate('/login');
+            } else {
+                setError(err.response?.data?.error || 'Failed to update emoji combination');
+                toast.error(err.response?.data?.error || 'Failed to update emoji combination');
+            }
         } finally {
             setLoading(false);
         }

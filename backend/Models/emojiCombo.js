@@ -22,6 +22,11 @@ const emojiComboSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Username is required']
     },
+    created_by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: [true, 'Creator is required']
+    },
     createdAt: { 
         type: Date, 
         default: Date.now,
