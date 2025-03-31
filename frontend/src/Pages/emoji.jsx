@@ -26,7 +26,7 @@ const EmojiComboList = () => {
             setLoading(true);
             const url = selectedUser 
                 ? `http://localhost:3000/api/emoji-combos?createdBy=${selectedUser}`
-                : "http://localhost:3000/api/emoji-combos";
+                : "https://emojicringechronicles.onrender.com";
             const response = await axios.get(url);
             setEmojiCombos(response.data.combos);
         } catch (err) {
