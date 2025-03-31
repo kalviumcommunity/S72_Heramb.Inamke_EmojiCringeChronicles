@@ -36,10 +36,10 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-white px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-white px-4 py-8 sm:px-6 lg:px-8">
+      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md space-y-8 bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg">
         <div>
-          <h2 className="text-3xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-primary-purple to-primary-pink">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-primary-purple to-primary-pink">
             Welcome Back!
           </h2>
           <p className="mt-2 text-center text-sm text-neutral-charcoal">

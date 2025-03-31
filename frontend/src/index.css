@@ -6,7 +6,6 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,6 +16,20 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Responsive font sizes */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 641px) {
+  html {
+    font-size: 16px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
