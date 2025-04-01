@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import EmojiComboCard from "../components/EmojiCard";
@@ -10,15 +10,33 @@ const EmojiComboList = () => {
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState("");
-    const { user, isAdmin } = useAuth();
+    const { user, isAdmin, logout } = useAuth();
+    const navigate = useNavigate();
 
     const fetchUsers = async () => {
         if (!isAdmin) return;
         try {
-            const response = await axios.get("https://emojicringechronicles.onrender.com/api/users");
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('Not authenticated. Please log in.');
+                navigate('/login');
+                return;
+            }
+
+            const response = await axios.get("https://emojicringechronicles.onrender.com/api/users", {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             setUsers(response.data || []);
         } catch (err) {
-            toast.error('Failed to fetch users');
+            if (err.response && err.response.status === 401) {
+                toast.error('Session expired. Please log in again.');
+                logout();
+                navigate('/login');
+            } else {
+                toast.error('Failed to fetch users');
+            }
             setUsers([]);
         }
     };
@@ -29,10 +47,20 @@ const EmojiComboList = () => {
             const url = selectedUser 
                 ? `https://emojicringechronicles.onrender.com/api/emoji-combos?createdBy=${selectedUser}`
                 : "https://emojicringechronicles.onrender.com/api/emoji-combos";
-            const response = await axios.get(url);
+            
+            const token = localStorage.getItem('token');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            
+            const response = await axios.get(url, { headers });
             setEmojiCombos(response.data?.combos || []);
         } catch (err) {
-            toast.error('Failed to fetch emoji combinations');
+            if (err.response && err.response.status === 401) {
+                toast.error('Session expired. Please log in again.');
+                logout();
+                navigate('/login');
+            } else {
+                toast.error('Failed to fetch emoji combinations');
+            }
             setEmojiCombos([]);
         } finally {
             setLoading(false);
@@ -47,11 +75,32 @@ const EmojiComboList = () => {
         }
 
         try {
-            await axios.delete(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`);
+            // Get token from localStorage
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('Not authenticated. Please log in.');
+                navigate('/login');
+                return;
+            }
+            
+            // Set the token in headers for this specific request
+            await axios.delete(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
             setEmojiCombos(prevCombos => prevCombos.filter(combo => combo._id !== id));
             toast.success('Emoji combination deleted successfully');
         } catch (err) {
-            toast.error('Failed to delete emoji combination');
+            if (err.response && err.response.status === 401) {
+                toast.error('Session expired. Please log in again.');
+                logout();
+                navigate('/login');
+            } else {
+                toast.error('Failed to delete emoji combination');
+                console.error('Delete error:', err);
+            }
         }
     };
 
