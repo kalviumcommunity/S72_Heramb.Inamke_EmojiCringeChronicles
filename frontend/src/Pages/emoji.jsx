@@ -13,6 +13,15 @@ const EmojiComboList = () => {
     const { user, isAdmin, logout } = useAuth();
     const navigate = useNavigate();
 
+    // Set default headers for all axios requests
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            console.log('Setting default Authorization header:', `Bearer ${token}`);
+        }
+    }, []);
+
     const fetchUsers = async () => {
         if (!isAdmin) return;
         try {
@@ -77,29 +86,51 @@ const EmojiComboList = () => {
         try {
             // Get token from localStorage
             const token = localStorage.getItem('token');
+            console.log('Token from localStorage:', token); // Debug log
+            
             if (!token) {
                 toast.error('Not authenticated. Please log in.');
                 navigate('/login');
                 return;
             }
             
+            // Force refresh the token in headers
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            console.log('Authorization header:', `Bearer ${token}`); // Debug log
+            
             // Set the token in headers for this specific request
-            await axios.delete(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`, {
+            const response = await axios.delete(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             });
+            
+            console.log('Delete response:', response); // Debug log
             
             setEmojiCombos(prevCombos => prevCombos.filter(combo => combo._id !== id));
             toast.success('Emoji combination deleted successfully');
         } catch (err) {
-            if (err.response && err.response.status === 401) {
-                toast.error('Session expired. Please log in again.');
-                logout();
-                navigate('/login');
+            console.error('Delete error details:', err); // Full error logging
+            
+            if (err.response) {
+                console.error('Error response:', err.response.status, err.response.data); // Log response details
+                
+                if (err.response.status === 401) {
+                    toast.error('Session expired. Please log in again.');
+                    // Try to refresh token or clear invalid token
+                    localStorage.removeItem('token');
+                    logout();
+                    navigate('/login');
+                } else {
+                    toast.error(`Failed to delete: ${err.response.data?.message || 'Unknown error'}`);
+                }
+            } else if (err.request) {
+                console.error('Error request:', err.request); // Log request that was made
+                toast.error('Network error. Please check your connection.');
             } else {
+                console.error('Error message:', err.message); // Log other errors
                 toast.error('Failed to delete emoji combination');
-                console.error('Delete error:', err);
             }
         }
     };
@@ -116,6 +147,11 @@ const EmojiComboList = () => {
     }, [selectedUser]);
 
     const handleRefresh = () => {
+        // Force token refresh before fetching
+        const token = localStorage.getItem('token');
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
         fetchEmojiCombos();
     };
 
