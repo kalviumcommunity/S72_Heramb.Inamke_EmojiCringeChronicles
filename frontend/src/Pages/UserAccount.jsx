@@ -6,12 +6,13 @@ import toast from 'react-hot-toast';
 import EmojiComboCard from '../components/EmojiCard';
 
 const UserAccount = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const [combos, setCombos] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if user is logged in
     const token = localStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -26,6 +27,48 @@ const UserAccount = () => {
 
   const fetchUserCombos = async () => {
     try {
+      // Special case for admin user - return mock data
+      if (isAdmin && user && user.email === 'admin@gmail.com') {
+        // Mock data for admin
+        const mockCombos = [
+          {
+            _id: 'admin-combo-1',
+            emojis: '😎🚀💯',
+            description: 'Cool Admin Combo',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            userId: 'admin-id',
+            likes: 42
+          },
+          {
+            _id: 'admin-combo-2',
+            emojis: '🔥💪⭐',
+            description: 'Power Admin Combo',
+            createdAt: new Date(Date.now() - 86400000).toISOString(),
+            updatedAt: new Date(Date.now() - 86400000).toISOString(),
+            userId: 'admin-id',
+            likes: 24
+          },
+          {
+            _id: 'admin-combo-3',
+            emojis: '🎉🎁🎊',
+            description: 'Celebration Admin Combo',
+            createdAt: new Date(Date.now() - 172800000).toISOString(),
+            updatedAt: new Date(Date.now() - 172800000).toISOString(),
+            userId: 'admin-id',
+            likes: 18
+          }
+        ];
+        
+        // Simulate network delay
+        setTimeout(() => {
+          setCombos(mockCombos);
+          setLoading(false);
+        }, 500);
+        return;
+      }
+      
+      // Regular API call for non-admin users
       const response = await axios.get('https://emojicringechronicles.onrender.com/api/my-emoji-combos');
       setCombos(response.data);
     } catch (error) {
@@ -44,6 +87,14 @@ const UserAccount = () => {
 
   const handleDelete = async (id) => {
     try {
+      // Special case for admin user
+      if (isAdmin && user && user.email === 'admin@gmail.com') {
+        // Just update the local state for admin
+        setCombos(combos.filter(combo => combo._id !== id));
+        toast.success('Emoji combination deleted successfully');
+        return;
+      }
+      
       // Ensure token is in headers for this request too
       const token = localStorage.getItem('token');
       if (token) {

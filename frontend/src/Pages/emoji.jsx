@@ -10,9 +10,10 @@ const EmojiComboList = () => {
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState("");
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
 
     const fetchUsers = async () => {
+        if (!isAdmin) return;
         try {
             const response = await axios.get("https://emojicringechronicles.onrender.com/api/users");
             setUsers(response.data || []);
@@ -38,10 +39,28 @@ const EmojiComboList = () => {
         }
     };
 
+    const handleDelete = async (id, creatorId) => {
+        // Allow deletion only if user is admin or if the combo belongs to the current user
+        if (!isAdmin && creatorId !== user?.id) {
+            toast.error('You can only delete your own combinations');
+            return;
+        }
+
+        try {
+            await axios.delete(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`);
+            setEmojiCombos(prevCombos => prevCombos.filter(combo => combo._id !== id));
+            toast.success('Emoji combination deleted successfully');
+        } catch (err) {
+            toast.error('Failed to delete emoji combination');
+        }
+    };
+
     useEffect(() => {
-        fetchUsers();
+        if (isAdmin) {
+            fetchUsers();
+        }
         fetchEmojiCombos();
-    }, []);
+    }, [isAdmin]);
 
     useEffect(() => {
         fetchEmojiCombos();
@@ -72,18 +91,20 @@ const EmojiComboList = () => {
                     {user ? 'Back to Account' : 'Home'}
                 </Link>
                 <div className="flex gap-4 items-center">
-                    <select
-                        value={selectedUser}
-                        onChange={(e) => setSelectedUser(e.target.value)}
-                        className="px-4 py-2 border border-primary-purple rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-purple"
-                    >
-                        <option value="">All Users</option>
-                        {users && users.map((user) => (
-                            <option key={user._id} value={user._id}>
-                                {user.username}
-                            </option>
-                        ))}
-                    </select>
+                    {isAdmin && (
+                        <select
+                            value={selectedUser}
+                            onChange={(e) => setSelectedUser(e.target.value)}
+                            className="px-4 py-2 border border-primary-purple rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-purple"
+                        >
+                            <option value="">All Users</option>
+                            {users.map((u) => (
+                                <option key={u._id} value={u._id}>
+                                    {u.username}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                     <button
                         onClick={handleRefresh}
                         className="px-4 py-2 text-secondary-green border border-secondary-green rounded-lg hover:bg-secondary-green hover:text-neutral-white transition-colors"
@@ -115,31 +136,47 @@ const EmojiComboList = () => {
                 
                 {(!emojiCombos || emojiCombos.length === 0) ? (
                     <div className="text-center py-12 bg-neutral-white rounded-lg shadow-md">
-                        <p className="text-neutral-charcoal">No emoji combinations yet. Be the first to add one!</p>
-                        {user ? (
+                        <p className="text-neutral-charcoal">No emoji combinations yet.</p>
+                        {user && (
                             <Link
                                 to="/add-emoji"
                                 className="mt-4 inline-block px-6 py-3 text-neutral-white rounded-lg bg-gradient-to-r from-primary-purple to-primary-pink hover:opacity-90 transition-colors"
                             >
                                 Create First Combination
                             </Link>
-                        ) : (
-                            <Link
-                                to="/login"
-                                className="mt-4 inline-block px-6 py-3 text-neutral-white rounded-lg bg-gradient-to-r from-primary-purple to-primary-pink hover:opacity-90 transition-colors"
-                            >
-                                Login to Create
-                            </Link>
                         )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {emojiCombos.map((combo) => (
-                            <EmojiComboCard 
-                                key={combo._id} 
-                                emoji={combo.emojis} 
-                                description={combo.description} 
-                            />
+                            <div key={combo._id} className="relative">
+                                <EmojiComboCard 
+                                    emoji={combo.emojis} 
+                                    description={combo.description} 
+                                />
+                                {(isAdmin || user?.id === combo.userId) && (
+                                    <div className="absolute top-2 right-2 flex gap-2">
+                                        {user?.id === combo.userId && (
+                                            <Link
+                                                to={`/edit-emoji/${combo._id}`}
+                                                className="p-2 bg-primary-purple text-white rounded-full hover:opacity-90 transition-colors"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                </svg>
+                                            </Link>
+                                        )}
+                                        <button
+                                            onClick={() => handleDelete(combo._id, combo.userId)}
+                                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </div>
                 )}

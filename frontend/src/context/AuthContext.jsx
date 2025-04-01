@@ -7,6 +7,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Set up axios defaults
   const setupAxiosDefaults = (token) => {
@@ -23,8 +24,10 @@ export const AuthProvider = ({ children }) => {
     const userData = localStorage.getItem('user');
     
     if (token && userData) {
+      const user = JSON.parse(userData);
       setupAxiosDefaults(token);
-      setUser(JSON.parse(userData));
+      setUser(user);
+      setIsAdmin(user.email === 'admin@gmail.com');
     }
     
     setLoading(false);
@@ -32,6 +35,26 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      // Special case for admin user
+      if (email === 'admin@gmail.com' && password === '12345678') {
+        // Create mock admin user and token
+        const adminUser = {
+          id: 'admin-id',
+          username: 'Admin',
+          email: 'admin@gmail.com',
+          role: 'admin'
+        };
+        const mockToken = 'admin-mock-token';
+        
+        localStorage.setItem('token', mockToken);
+        localStorage.setItem('user', JSON.stringify(adminUser));
+        setupAxiosDefaults(mockToken);
+        setUser(adminUser);
+        setIsAdmin(true);
+        return { success: true };
+      }
+      
+      // Regular login for non-admin users
       const response = await axios.post('https://emojicringechronicles.onrender.com/api/auth/login', {
         email,
         password
@@ -42,6 +65,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(user));
       setupAxiosDefaults(token);
       setUser(user);
+      setIsAdmin(email === 'admin@gmail.com');
       return { success: true };
     } catch (error) {
       return {
@@ -64,6 +88,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(user));
       setupAxiosDefaults(token);
       setUser(user);
+      setIsAdmin(email === 'admin@gmail.com');
       return { success: true };
     } catch (error) {
       return {
@@ -78,6 +103,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     setupAxiosDefaults(null);
     setUser(null);
+    setIsAdmin(false);
   };
 
   const value = {
@@ -85,7 +111,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    loading
+    loading,
+    isAdmin
   };
 
   return (
