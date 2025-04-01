@@ -8,17 +8,24 @@ export default {
     extend: {
       colors: {
         primary: {
-          purple: '#A729F5',
-          pink: '#FF47A1',
-          yellow: '#FFD700',
+          purple: '#7C3AED', // More vibrant purple
+          pink: '#EC4899', // More vibrant pink
+          yellow: '#F59E0B', // Warm amber
         },
         secondary: {
-          blue: '#00D4FF',
-          green: '#50C878',
+          blue: '#3B82F6', // Bright blue
+          green: '#10B981', // Emerald green
         },
         neutral: {
-          white: '#F8F9FA',
-          charcoal: '#2B2B2B',
+          white: '#F3F4F6', // Lighter gray
+          charcoal: '#1F2937', // Darker gray
+          card: '#FFFFFF', // Pure white for cards
+          background: '#E5E7EB', // Light gray background
+        },
+        accent: {
+          purple: '#9333EA', // Secondary purple
+          pink: '#BE185D', // Secondary pink
+          yellow: '#D97706', // Secondary amber
         },
       },
       screens: {
