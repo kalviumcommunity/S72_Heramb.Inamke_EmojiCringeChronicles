@@ -15,9 +15,10 @@ const EmojiComboList = () => {
     const fetchUsers = async () => {
         try {
             const response = await axios.get("https://emojicringechronicles.onrender.com/api/users");
-            setUsers(response.data);
+            setUsers(response.data || []);
         } catch (err) {
             toast.error('Failed to fetch users');
+            setUsers([]);
         }
     };
 
@@ -25,12 +26,13 @@ const EmojiComboList = () => {
         try {
             setLoading(true);
             const url = selectedUser 
-                ? `https://emojicringechronicles.onrender.com?createdBy=${selectedUser}`
+                ? `https://emojicringechronicles.onrender.com/api/emoji-combos?createdBy=${selectedUser}`
                 : "https://emojicringechronicles.onrender.com/api/emoji-combos";
             const response = await axios.get(url);
-            setEmojiCombos(response.data.combos);
+            setEmojiCombos(response.data?.combos || []);
         } catch (err) {
             toast.error('Failed to fetch emoji combinations');
+            setEmojiCombos([]);
         } finally {
             setLoading(false);
         }
@@ -76,7 +78,7 @@ const EmojiComboList = () => {
                         className="px-4 py-2 border border-primary-purple rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-purple"
                     >
                         <option value="">All Users</option>
-                        {users.map((user) => (
+                        {users && users.map((user) => (
                             <option key={user._id} value={user._id}>
                                 {user.username}
                             </option>
@@ -111,7 +113,7 @@ const EmojiComboList = () => {
                     Emoji Combinations
                 </h1>
                 
-                {emojiCombos.length === 0 ? (
+                {(!emojiCombos || emojiCombos.length === 0) ? (
                     <div className="text-center py-12 bg-neutral-white rounded-lg shadow-md">
                         <p className="text-neutral-charcoal">No emoji combinations yet. Be the first to add one!</p>
                         {user ? (
