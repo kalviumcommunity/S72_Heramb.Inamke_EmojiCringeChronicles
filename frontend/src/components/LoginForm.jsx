@@ -82,6 +82,17 @@ const LoginForm = () => {
             </div>
           </div>
 
+          <div className="flex justify-end">
+            <a
+              href="https://otp-psi-liard.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary-purple hover:text-opacity-80"
+            >
+              Forgot your password?
+            </a>
+          </div>
+
           <div>
             <button
               type="submit"
