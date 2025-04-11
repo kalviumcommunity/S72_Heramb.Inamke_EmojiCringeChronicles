@@ -7,8 +7,10 @@ import LandingPage from './Pages/LandingPage';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import EmojiComboList from './Pages/emoji';
-import AddEmoji from './Pages/AddEmoji';
-import EditEmoji from './Pages/EditEmoji';
+// import AddEmoji from './Pages/AddEmoji';
+import AddEmoji from './components/AddEmoji'
+// import EditEmoji from './Pages/EditEmoji';
+import  EditEmoji from './components/EditEmoji'
 import UserAccount from './Pages/UserAccount';
 
 function App() {
