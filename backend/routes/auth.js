@@ -32,6 +32,14 @@ router.post('/register', validateAuth, asyncHandler(async (req, res) => {
         { expiresIn: '24h' }
     );
 
+    // Set cookie with token
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
     res.status(201).json({
         message: 'User registered successfully',
         token,
@@ -66,6 +74,14 @@ router.post('/login', validateAuth, asyncHandler(async (req, res) => {
         { expiresIn: '24h' }
     );
 
+    // Set cookie with token
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
     res.json({
         message: 'Login successful',
         token,
@@ -76,5 +92,17 @@ router.post('/login', validateAuth, asyncHandler(async (req, res) => {
         }
     });
 }));
+
+// Logout user
+router.post('/logout', (req, res) => {
+    // Clear the token cookie
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+    });
+
+    res.json({ message: 'Logged out successfully' });
+});
 
 module.exports = router;
