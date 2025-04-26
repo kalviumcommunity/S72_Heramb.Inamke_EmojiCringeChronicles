@@ -29,7 +29,8 @@ const EditEmoji = () => {
 
     const fetchEmojiCombo = async () => {
         try {
-            const response = await axios.get(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`);
+            // Use SQL API endpoint
+            const response = await axios.get(`https://emojicringechronicles.onrender.com/api/sql/emoji-combos/${id}`);
             const { emojis, description } = response.data;
             setFormData({ emojis, description });
         } catch (err) {
@@ -58,7 +59,8 @@ const EditEmoji = () => {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             }
             
-            await axios.put(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`, formData);
+            // Use SQL API endpoint
+            await axios.put(`https://emojicringechronicles.onrender.com/api/sql/emoji-combos/${id}`, formData);
             toast.success('Emoji combination updated successfully');
             navigate('/account');
         } catch (err) {

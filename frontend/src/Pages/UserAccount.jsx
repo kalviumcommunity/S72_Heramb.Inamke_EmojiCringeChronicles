@@ -32,30 +32,30 @@ const UserAccount = () => {
         // Mock data for admin
         const mockCombos = [
           {
-            _id: 'admin-combo-1',
+            id: 'admin-combo-1',
             emojis: '😎🚀💯',
             description: 'Cool Admin Combo',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            userId: 'admin-id',
+            created_by: 'admin-id',
             likes: 42
           },
           {
-            _id: 'admin-combo-2',
+            id: 'admin-combo-2',
             emojis: '🔥💪⭐',
             description: 'Power Admin Combo',
             createdAt: new Date(Date.now() - 86400000).toISOString(),
             updatedAt: new Date(Date.now() - 86400000).toISOString(),
-            userId: 'admin-id',
+            created_by: 'admin-id',
             likes: 24
           },
           {
-            _id: 'admin-combo-3',
+            id: 'admin-combo-3',
             emojis: '🎉🎁🎊',
             description: 'Celebration Admin Combo',
             createdAt: new Date(Date.now() - 172800000).toISOString(),
             updatedAt: new Date(Date.now() - 172800000).toISOString(),
-            userId: 'admin-id',
+            created_by: 'admin-id',
             likes: 18
           }
         ];
@@ -68,8 +68,8 @@ const UserAccount = () => {
         return;
       }
       
-      // Regular API call for non-admin users
-      const response = await axios.get('https://emojicringechronicles.onrender.com/api/my-emoji-combos');
+      // Regular API call for non-admin users - using SQL API
+      const response = await axios.get('https://emojicringechronicles.onrender.com/api/sql/my-emoji-combos');
       setCombos(response.data);
     } catch (error) {
       console.error('Error fetching combos:', error);
@@ -90,7 +90,7 @@ const UserAccount = () => {
       // Special case for admin user
       if (isAdmin && user && user.email === 'admin@gmail.com') {
         // Just update the local state for admin
-        setCombos(combos.filter(combo => combo._id !== id));
+        setCombos(combos.filter(combo => combo.id !== id));
         toast.success('Emoji combination deleted successfully');
         return;
       }
@@ -101,8 +101,9 @@ const UserAccount = () => {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
       
-      await axios.delete(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`);
-      setCombos(combos.filter(combo => combo._id !== id));
+      // Use SQL API endpoint
+      await axios.delete(`https://emojicringechronicles.onrender.com/api/sql/emoji-combos/${id}`);
+      setCombos(combos.filter(combo => combo.id !== id));
       toast.success('Emoji combination deleted successfully');
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -174,11 +175,11 @@ const UserAccount = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {combos.map((combo) => (
-              <div key={combo._id} className="relative">
+              <div key={combo.id} className="relative">
                 <EmojiComboCard emoji={combo.emojis} description={combo.description} />
                 <div className="absolute top-2 right-2 flex gap-2">
                   <Link
-                    to={`/edit-emoji/${combo._id}`}
+                    to={`/edit-emoji/${combo.id}`}
                     className="p-2 bg-primary-purple text-white rounded-full hover:opacity-90 transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -186,7 +187,7 @@ const UserAccount = () => {
                     </svg>
                   </Link>
                   <button
-                    onClick={() => handleDelete(combo._id)}
+                    onClick={() => handleDelete(combo.id)}
                     className="p-2 bg-red-500 text-white rounded-full hover:opacity-90 transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

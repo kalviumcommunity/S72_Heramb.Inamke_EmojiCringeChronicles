@@ -38,7 +38,8 @@ const AddEmoji = () => {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             }
             
-            await axios.post('https://emojicringechronicles.onrender.com/api/emoji-combos', formData);
+            // Use SQL API endpoint
+            await axios.post('https://emojicringechronicles.onrender.com/api/sql/emoji-combos', formData);
             toast.success('Emoji combination added successfully');
             navigate('/account');
         } catch (err) {
