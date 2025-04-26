@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -8,24 +8,33 @@ const LoginForm = () => {
     email: '',
     password: ''
   });
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const location = useLocation();
+  const { login, loading } = useAuth();
+
+  // Get the redirect path from location state or default to '/account'
+  const from = location.state?.from?.pathname || '/account';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setError('');
 
-    const result = await login(formData.email, formData.password);
-    
-    if (result.success) {
-      toast.success('Welcome back!');
-      navigate('/account');
-    } else {
-      toast.error(result.error);
+    try {
+      const result = await login(formData.email, formData.password);
+      
+      if (result.success) {
+        toast.success('Welcome back!');
+        navigate(from, { replace: true });
+      } else {
+        setError(result.error);
+        toast.error(result.error);
+      }
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || 'Login failed. Please try again.';
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
-    
-    setLoading(false);
   };
 
   const handleChange = (e) => {
@@ -47,6 +56,12 @@ const LoginForm = () => {
           </p>
         </div>
 
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -62,6 +77,7 @@ const LoginForm = () => {
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
 
@@ -78,6 +94,7 @@ const LoginForm = () => {
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
           </div>
@@ -99,7 +116,17 @@ const LoginForm = () => {
               disabled={loading}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary-purple to-primary-pink hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-purple disabled:opacity-50"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                'Sign in'
+              )}
             </button>
           </div>
 
