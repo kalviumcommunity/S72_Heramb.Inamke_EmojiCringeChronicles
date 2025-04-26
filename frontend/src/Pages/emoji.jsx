@@ -23,16 +23,16 @@ const EmojiComboList = () => {
     }, []);
 
     const fetchUsers = async () => {
-        if (!isAdmin) return;
         try {
             const token = localStorage.getItem('token');
-            if (!token) {
+            if (!token && isAdmin) {
                 toast.error('Not authenticated. Please log in.');
                 navigate('/login');
                 return;
             }
 
-            const response = await axios.get("https://emojicringechronicles.onrender.com/api/users", {
+            // Use the SQL API endpoint to fetch users
+            const response = await axios.get("https://emojicringechronicles.onrender.com/api/sql/users", {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -53,15 +53,27 @@ const EmojiComboList = () => {
     const fetchEmojiCombos = async () => {
         try {
             setLoading(true);
-            const url = selectedUser 
-                ? `https://emojicringechronicles.onrender.com/api/emoji-combos?createdBy=${selectedUser}`
-                : "https://emojicringechronicles.onrender.com/api/emoji-combos";
+            let url;
+            
+            if (selectedUser) {
+                // Use the SQL API endpoint to fetch emoji combos by user
+                url = `https://emojicringechronicles.onrender.com/api/sql/user/${selectedUser}/emoji-combos`;
+            } else {
+                // Use the SQL API endpoint to fetch all emoji combos
+                url = "https://emojicringechronicles.onrender.com/api/sql/emoji-combos";
+            }
             
             const token = localStorage.getItem('token');
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
             
             const response = await axios.get(url, { headers });
-            setEmojiCombos(response.data?.combos || []);
+            
+            // Handle different response formats based on endpoint
+            if (selectedUser) {
+                setEmojiCombos(response.data?.combos || []);
+            } else {
+                setEmojiCombos(response.data?.combos || []);
+            }
         } catch (err) {
             if (err.response && err.response.status === 401) {
                 toast.error('Session expired. Please log in again.');
@@ -98,8 +110,8 @@ const EmojiComboList = () => {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             console.log('Authorization header:', `Bearer ${token}`); // Debug log
             
-            // Set the token in headers for this specific request
-            const response = await axios.delete(`https://emojicringechronicles.onrender.com/api/emoji-combos/${id}`, {
+            // Use the SQL API endpoint for deletion
+            const response = await axios.delete(`https://emojicringechronicles.onrender.com/api/sql/emoji-combos/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -108,7 +120,7 @@ const EmojiComboList = () => {
             
             console.log('Delete response:', response); // Debug log
             
-            setEmojiCombos(prevCombos => prevCombos.filter(combo => combo._id !== id));
+            setEmojiCombos(prevCombos => prevCombos.filter(combo => combo.id !== id));
             toast.success('Emoji combination deleted successfully');
         } catch (err) {
             console.error('Delete error details:', err); // Full error logging
@@ -136,11 +148,10 @@ const EmojiComboList = () => {
     };
 
     useEffect(() => {
-        if (isAdmin) {
-            fetchUsers();
-        }
+        // Fetch users for everyone, not just admins
+        fetchUsers();
         fetchEmojiCombos();
-    }, [isAdmin]);
+    }, []);
 
     useEffect(() => {
         fetchEmojiCombos();
@@ -176,20 +187,19 @@ const EmojiComboList = () => {
                     {user ? 'Back to Account' : 'Home'}
                 </Link>
                 <div className="flex gap-4 items-center">
-                    {isAdmin && (
-                        <select
-                            value={selectedUser}
-                            onChange={(e) => setSelectedUser(e.target.value)}
-                            className="px-4 py-2 border border-primary-purple rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-purple"
-                        >
-                            <option value="">All Users</option>
-                            {users.map((u) => (
-                                <option key={u._id} value={u._id}>
-                                    {u.username}
-                                </option>
-                            ))}
-                        </select>
-                    )}
+                    {/* Show user dropdown for everyone, not just admins */}
+                    <select
+                        value={selectedUser}
+                        onChange={(e) => setSelectedUser(e.target.value)}
+                        className="px-4 py-2 border border-primary-purple rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-purple"
+                    >
+                        <option value="">All Users</option>
+                        {users.map((u) => (
+                            <option key={u.id} value={u.id}>
+                                {u.username}
+                            </option>
+                        ))}
+                    </select>
                     <button
                         onClick={handleRefresh}
                         className="px-4 py-2 text-secondary-green border border-secondary-green rounded-lg hover:bg-secondary-green hover:text-neutral-white transition-colors"
@@ -234,16 +244,16 @@ const EmojiComboList = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {emojiCombos.map((combo) => (
-                            <div key={combo._id} className="relative">
+                            <div key={combo.id} className="relative">
                                 <EmojiComboCard 
                                     emoji={combo.emojis} 
                                     description={combo.description} 
                                 />
-                                {(isAdmin || user?.id === combo.userId) && (
+                                {(isAdmin || user?.id === combo.created_by) && (
                                     <div className="absolute top-2 right-2 flex gap-2">
-                                        {user?.id === combo.userId && (
+                                        {user?.id === combo.created_by && (
                                             <Link
-                                                to={`/edit-emoji/${combo._id}`}
+                                                to={`/edit-emoji/${combo.id}`}
                                                 className="p-2 bg-primary-purple text-white rounded-full hover:opacity-90 transition-colors"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -252,7 +262,7 @@ const EmojiComboList = () => {
                                             </Link>
                                         )}
                                         <button
-                                            onClick={() => handleDelete(combo._id, combo.userId)}
+                                            onClick={() => handleDelete(combo.id, combo.created_by)}
                                             className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
